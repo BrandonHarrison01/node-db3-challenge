@@ -22,6 +22,7 @@ router.get('/:id', (req, res) => {
 
   Schemes
     .findById(id)
+    .first()
     .then(scheme => {
       if (scheme) {
         res.json(scheme);
@@ -65,7 +66,7 @@ router.post('/', (req, res) => {
 });
 
 
-
+// POST new step (stretch)
 
 router.post('/:id/steps', async (req, res) => {
   const stepData = req.body;
@@ -85,38 +86,45 @@ router.post('/:id/steps', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+
+// PUT edit scheme
+
+router.put('/:id', (req, res) => {
   const { id } = req.params;
   const changes = req.body;
 
-  try {
-    const scheme = await Schemes.findById(id);
-
-    if (scheme) {
-      const updatedScheme = await Schemes.update(changes, id);
-      res.json(updatedScheme);
-    } else {
-      res.status(404).json({ message: 'Could not find scheme with given id' });
-    }
-  } catch (err) {
+  Schemes
+    .update(id, changes)
+    .then(scheme => {
+      if (scheme) {
+        res.json(scheme);
+      } else {
+        res.status(404).json({ message: 'Could not find scheme with given id' });
+      }
+    })
+    .catch (err => {
     res.status(500).json({ message: 'Failed to update scheme' });
-  }
+    })
 });
+
+
+// DELETE remove a scheme
 
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
-  try {
-    const deleted = await Schemes.remove(id);
-
-    if (deleted) {
-      res.json({ removed: deleted });
-    } else {
-      res.status(404).json({ message: 'Could not find scheme with given id' });
-    }
-  } catch (err) {
-    res.status(500).json({ message: 'Failed to delete scheme' });
-  }
+  Schemes
+    .remove(id)
+    .then(deleted => {
+      if (deleted) {
+        res.json({ removed: deleted });
+      } else {
+        res.status(404).json({ message: 'Could not find scheme with given id' });
+      }
+    })
+    .catch (err => {
+      res.status(500).json({ message: 'Failed to delete scheme' });
+    })
 });
 
 module.exports = router;
